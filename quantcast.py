@@ -1,12 +1,10 @@
 import csv
-from http.cookiejar import Cookie
-import sys
 # read the csv file
 
-input_line = ""
-for line in sys.stdin:
-  input_line = line
-
+# I am currently using python 2.XX but for python 3 
+# use input instead of raw_input
+# input_line = input("enter command = ")
+input_line = raw_input("enter command = ")
 file_name = ""
 date = ""
 
@@ -18,42 +16,42 @@ for var in input_line.split("-d"):
 
 # strip white space:
 file_name = file_name.strip(" ")
-date = date.strip(" ")
+input_date = date.strip(" ")
 
-cookie_dict = dict()
 date_dict = dict()
+'''
+date_dict = {
+  2018-12-09: {"cookie #1": # of occurences of that day
+  ...
+              }
+}
+'''
+
+output = "" # separated by /n if there's multiple
+mostActive = 1
+cookie_dict = dict() # dictionary of cookies found in the given date
 
 with open(file_name) as csv_file:
   # delimiter will separate the cookie from its date
   csv_reader = csv.reader(csv_file, delimiter=',')
   line_count = 0
   for row in csv_reader:
-    line_count += 1
-    if line_count > 0:
       cookie = row[0]
-      date, time = row[1].split("T")
-      # check for cookie
-      if cookie in cookie_dict:
-        cookie_dict[cookie] += 1
-      else:
-        cookie_dict[cookie] = 1
-      # check for date:
-      if date in date_dict:
-        date_dict[date].append(cookie)
-      else:
-        date_dict[date] = [cookie]
+      date = row[1].split("T")[0]
+      # once we have the cookie found in the given date:
+      if date == input_date:
+        if cookie in cookie_dict:
+          cookie_dict[cookie] += 1
+        else:
+          cookie_dict[cookie] = 1
 
-# now we can finally return the mostActiveCookie:
-cookies = date_dict[date]
-output = "" # separated by /n if there's multiple
-mostActive = 1
-
-for cookie in cookies:
-  if cookie_dict[cookie] == mostActive:
-    output += cookie
+for cookie in cookie_dict:
+  occurence = cookie_dict[cookie]
+  if occurence == mostActive:
+    output += cookie 
     output += "\n"
-  elif cookie_dict[cookie] > mostActive:
-    mostActive = cookie_dict[cookie]
+  elif occurence > mostActive:
     output = cookie + "\n"
+    mostActive = occurence
 
-sys.stdout(output[:-1]) # exclude the last \n
+print(output[:-1]) # exclude the last \n
